@@ -28,6 +28,8 @@ import {
   addToTrash,
 } from "@/utils/storage-manager"
 
+import Image from 'next/image'
+
 export default function TokkakariPlanner() {
   const [activeTab, setActiveTab] = useState<"immediate" | "later">("immediate")
   const [tasks, setTasks] = useState<Task[]>([])
@@ -507,7 +509,13 @@ export default function TokkakariPlanner() {
       {/* Header */}
       <div className="bg-white px-4 text-center flex-shrink-0 py-6 border-b">
         <div className="flex items-center relative justify-center mb-[-15px]">
-          <img src="/images/yarn-ball-logo.png" alt="とっかかりプランナー ロゴ" className="w-16 h-16" />
+           <Image
+      src="/images/yarn-ball-logo.png"
+      alt="とっかかりプランナー ロゴ"
+      width={64}  // 画像の実際の幅 (px)
+      height={64} // 画像の実際の高さ (px)
+      className="w-16 h-16" // Tailwind CSS のスタイルはそのまま適用可能
+    />
           {/* Trash Button */}
           <Button
             variant="ghost"
@@ -671,7 +679,7 @@ export default function TokkakariPlanner() {
                 category: executionTask?.category || activeTab,
                 createdAt: new Date(),
               }
-              setTasks((prev) => [...prev, ...newTask])
+              setTasks((prev) => [...prev, newTask])
             }}
           />
         </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Fragment } from "react" // Added Fragment
 import { Button } from "@/components/ui/button"
 import { Plus, Check, X } from "lucide-react"
 import type { Task } from "@/types/task"
@@ -277,7 +277,8 @@ export function TaskExecution({
         <div className="flex flex-col items-center mr-4 mt-2 flex-shrink-0">
           <button
             onClick={() => handleTaskToggle(originalIndex)}
-            disabled={!isClickable || (tutorialStep && !isTutorialExecutionEnabled("task-check", originalIndex))}
+            // Corrected disabled prop type
+            disabled={!isClickable || !!(tutorialStep && !isTutorialExecutionEnabled("task-check", originalIndex))}
             className={`current-task-check w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
               isCompleted
                 ? "bg-teal-600 border-teal-600 cursor-pointer hover:bg-teal-700"
@@ -379,7 +380,7 @@ export function TaskExecution({
           variant="ghost"
           size="sm"
           onClick={handleInterrupt}
-          disabled={tutorialStep && !isTutorialExecutionEnabled("interrupt")}
+          disabled={!!(tutorialStep && !isTutorialExecutionEnabled("interrupt"))} // Corrected disabled prop type
           className={`interrupt-button text-gray-600 hover:bg-gray-100 px-3 py-1 text-sm font-bold ${
             tutorialStep && !isTutorialExecutionEnabled("interrupt") ? "opacity-30 cursor-not-allowed" : ""
           }`}

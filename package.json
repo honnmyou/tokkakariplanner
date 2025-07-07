@@ -1,12 +1,15 @@
 {
+  "homepage": "https://honnmyou.github.io/tokkakariplanner",
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
     "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint",
-    "start": "next start"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d out"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",
@@ -45,6 +48,7 @@
     "cmdk": "latest",
     "date-fns": "4.1.0",
     "embla-carousel-react": "latest",
+    "gh-pages": "^6.3.0",
     "input-otp": "latest",
     "lucide-react": "^0.454.0",
     "next": "^15.2.4",

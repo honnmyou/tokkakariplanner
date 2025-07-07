@@ -19,6 +19,10 @@ const COLORS = {
   WHITE: "#FFFFFF",
 } as const
 
+const RED_BUTTON_CLASSES = "bg-red-100 border-red-500 text-red-700"
+const BLUE_BUTTON_CLASSES = "bg-blue-100 border-blue-500 text-blue-700"
+
+
 interface TaskItemProps {
   task: Task
   onToggleComplete: (id: string) => void
@@ -42,6 +46,7 @@ export function TaskItem({
   tutorialStep,
   showTutorial,
 }: TaskItemProps) {
+  const activeButtonClass = accentColor.includes("red") ? RED_BUTTON_CLASSES : BLUE_BUTTON_CLASSES
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [editDueDate, setEditDueDate] = useState(task.dueDate ? task.dueDate.toISOString().slice(0, 16) : "")
@@ -181,63 +186,61 @@ export function TaskItem({
           />
 
           {/* 期日設定セクション */}
-          <div>
-            <h4 className="text-sm font-bold mb-2 text-gray-700">期限設定</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleDueDateSelect("today")}
-                className={`px-2 py-1.5 text-sm border rounded text-left transition-all duration-200 font-bold ${
-                  selectedDateOption === "today" ? `${activeButtonColor} shadow-md` : "border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                今日
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDueDateSelect("tomorrow")}
-                className={`px-2 py-1.5 text-sm border rounded text-left transition-all duration-200 font-bold ${
-                  selectedDateOption === "tomorrow"
-                    ? `${activeButtonColor} shadow-md`
-                    : "border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                明日
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDueDateSelect("weekend")}
-                className={`px-2 py-1.5 text-sm border rounded text-left transition-all duration-200 font-bold ${
-                  selectedDateOption === "weekend"
-                    ? `${activeButtonColor} shadow-md`
-                    : "border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                今週末
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDueDateSelect("custom")}
-                className={`px-2 py-1.5 text-sm border rounded text-left flex items-center gap-1 transition-all duration-200 font-bold ${
-                  selectedDateOption === "custom"
-                    ? `${activeButtonColor} shadow-md`
-                    : "border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <Calendar className="w-3 h-3" />
-                日付指定
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDueDateSelect("none")}
-                className={`px-2 py-1.5 text-sm border rounded text-left col-span-2 transition-all duration-200 font-bold ${
-                  selectedDateOption === "none" ? `${activeButtonColor} shadow-md` : "border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                期限なし
-              </button>
-            </div>
-          </div>
+<div>
+  <h4 className="text-sm font-bold mb-2 text-gray-700">期限設定</h4>
+  <div className="grid grid-cols-2 gap-2">
+    <button
+      type="button"
+      onClick={() => handleDueDateSelect("today")}
+      className={`px-2 py-1.5 text-sm border rounded text-left transition-all duration-200 font-bold ${
+        selectedDateOption === "today" ? `${activeButtonClass} shadow-md` : "border-gray-300 hover:bg-gray-50"
+      }`}
+    >
+      今日
+    </button>
+
+    <button
+      type="button"
+      onClick={() => handleDueDateSelect("tomorrow")}
+      className={`px-2 py-1.5 text-sm border rounded text-left transition-all duration-200 font-bold ${
+        selectedDateOption === "tomorrow" ? `${activeButtonClass} shadow-md` : "border-gray-300 hover:bg-gray-50"
+      }`}
+    >
+      明日
+    </button>
+
+    <button
+      type="button"
+      onClick={() => handleDueDateSelect("weekend")}
+      className={`px-2 py-1.5 text-sm border rounded text-left transition-all duration-200 font-bold ${
+        selectedDateOption === "weekend" ? `${activeButtonClass} shadow-md` : "border-gray-300 hover:bg-gray-50"
+      }`}
+    >
+      今週末
+    </button>
+
+    <button
+      type="button"
+      onClick={() => handleDueDateSelect("custom")}
+      className={`px-2 py-1.5 text-sm border rounded text-left flex items-center gap-1 transition-all duration-200 font-bold ${
+        selectedDateOption === "custom" ? `${activeButtonClass} shadow-md` : "border-gray-300 hover:bg-gray-50"
+      }`}
+    >
+      <Calendar className="w-3 h-3" />
+      日付指定
+    </button>
+
+    <button
+      type="button"
+      onClick={() => handleDueDateSelect("none")}
+      className={`px-2 py-1.5 text-sm border rounded text-left col-span-2 transition-all duration-200 font-bold ${
+        selectedDateOption === "none" ? `${activeButtonClass} shadow-md` : "border-gray-300 hover:bg-gray-50"
+      }`}
+    >
+      期限なし
+    </button>
+  </div>
+</div>
 
           {showDateOptions && (
             <div className="space-y-2 p-2 bg-gray-50 rounded-lg border border-gray-200 animate-in slide-in-from-top-2 duration-300">

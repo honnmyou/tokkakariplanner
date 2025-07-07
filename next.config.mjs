@@ -1,14 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
-}
+  output: 'export', // 静的エクスポートの設定（もしあれば）
+  // ↓↓↓ ここに basePath を追加 ↓↓↓
+  basePath: '/tokkakariplanner', // ★★★ ここにあなたのリポジトリ名を入力！ ★★★
+  // ↑↑↑ ここに basePath を追加 ↑↑↑
+};
 
-export default nextConfig
+export default nextConfig;

@@ -1,3 +1,4 @@
+// components/ui/chart.tsx
 "use client"
 
 import * as React from "react"
@@ -102,16 +103,44 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+// --- TooltipPayload の型を明示的に定義 ---
+// RechartsのTooltipPayloadの一般的な構造に合わせて定義します。
+// これにより、rechartsの内部型定義に依存しすぎず、かつ型安全性を保ちます。
+interface ExtractedTooltipPayload {
+  value?: any; // ValueType
+  name?: any; // NameType
+  unit?: string;
+  dataKey?: string | number | ((data: any) => string | number); // dataKeyは関数である可能性も考慮
+  color?: string;
+  fill?: string;
+  stroke?: string;
+  payload?: any; // RechartsTooltipPayload内にネストされたpayload（元のデータオブジェクトなど）
+  // 他に必要なTooltipPayloadのプロパティがあればここに追加
+  strokeWidth?: number;
+  // ChartTooltipContentPropsで使われるその他のプロパティ
+  formatter?: (value: any, name: any, item: any, index: number, payload: any) => React.ReactNode;
+}
+
+
+// ChartTooltipContentProps の修正
+type ChartTooltipContentProps = React.ComponentProps<"div"> &
+  Omit<RechartsPrimitive.TooltipProps<any, any>, 'ref' | 'payload' | 'label'> & // TooltipPropsのpayloadとlabelはOmitして、手動で定義
+  {
+    hideLabel?: boolean
+    hideIndicator?: boolean
+    indicator?: "line" | "dot" | "dashed"
+    // `payload`と`label`はRechartsPrimitive.TooltipPropsからOmitし、明示的に型を定義
+    payload?: ExtractedTooltipPayload[];
+    label?: string | number | Date; // labelの型は表示されるデータの型に合わせる
+    labelFormatter?: (label: any, payload: ExtractedTooltipPayload[]) => React.ReactNode;
+    formatter?: (value: any, name: any, item: ExtractedTooltipPayload, index: number, payload: any) => React.ReactNode;
+    nameKey?: string
+    labelKey?: string
+  }
+
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<"div"> & {
-      hideLabel?: boolean
-      hideIndicator?: boolean
-      indicator?: "line" | "dot" | "dashed"
-      nameKey?: string
-      labelKey?: string
-    }
+  ChartTooltipContentProps
 >(
   (
     {
@@ -139,7 +168,7 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       const [item] = payload
-      const key = `${labelKey || item.dataKey || item.name || "value"}`
+      const key = `${labelKey || (typeof item.dataKey === 'string' ? item.dataKey : item.name) || "value"}`
       const itemConfig = getPayloadConfigFromPayload(config, item, key)
       const value =
         !labelKey && typeof label === "string"
@@ -185,20 +214,21 @@ const ChartTooltipContent = React.forwardRef<
       >
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
-          {payload.map((item, index) => {
-            const key = `${nameKey || item.name || item.dataKey || "value"}`
+          {payload.map((item: ExtractedTooltipPayload, index: number) => {
+            const key = `${nameKey || (typeof item.dataKey === 'string' ? item.dataKey : item.name) || "value"}`
             const itemConfig = getPayloadConfigFromPayload(config, item, key)
-            const indicatorColor = color || item.payload.fill || item.color
+            const indicatorColor = color || item.payload?.fill || item.color
 
             return (
               <div
-                key={item.dataKey}
+                key={typeof item.dataKey === 'string' ? item.dataKey : String(item.name) || index} // dataKeyが関数の場合のフォールバック
                 className={cn(
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                   indicator === "dot" && "items-center"
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
+                  // item.payloadがundefinedの可能性があるのでオプショナルチェイニング
                   formatter(item.value, item.name, item, index, item.payload)
                 ) : (
                   <>
@@ -258,13 +288,18 @@ ChartTooltipContent.displayName = "ChartTooltip"
 
 const ChartLegend = RechartsPrimitive.Legend
 
+// ChartLegendContentProps の修正
+type ChartLegendContentProps = React.ComponentProps<"div"> &
+  Pick<RechartsPrimitive.LegendProps, "verticalAlign"> & {
+    // RechartsPrimitive.LegendPayload はrechartsがエクスポートしている型なのでそのまま使用
+    payload?: RechartsPrimitive.LegendPayload[];
+    hideIcon?: boolean
+    nameKey?: string
+  }
+
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-      hideIcon?: boolean
-      nameKey?: string
-    }
+  ChartLegendContentProps
 >(
   (
     { className, hideIcon = false, payload, verticalAlign = "bottom", nameKey },
@@ -285,13 +320,13 @@ const ChartLegendContent = React.forwardRef<
           className
         )}
       >
-        {payload.map((item) => {
-          const key = `${nameKey || item.dataKey || "value"}`
+        {payload.map((item: RechartsPrimitive.LegendPayload) => {
+          const key = `${nameKey || (typeof item.dataKey === 'string' ? item.dataKey : String(item.value)) || "value"}` // dataKeyが関数の場合のフォールバック
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
 
           return (
             <div
-              key={item.value}
+              key={typeof item.dataKey === 'string' ? item.dataKey : String(item.value) || key} // dataKeyが関数の場合のフォールバック
               className={cn(
                 "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
               )}
@@ -335,6 +370,7 @@ function getPayloadConfigFromPayload(
 
   let configLabelKey: string = key
 
+  // item.dataKey が関数の場合を考慮して、stringに限定
   if (
     key in payload &&
     typeof payload[key as keyof typeof payload] === "string"

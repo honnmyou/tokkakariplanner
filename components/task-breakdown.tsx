@@ -39,15 +39,13 @@ interface SpeechRecognitionErrorEvent extends Event {
 interface SpeechRecognitionResultList {
   length: number
   item(index: number): SpeechRecognitionResult
-  [index: number]: SpeechRecognitionResult
-  [index: number]: SpeechRecognitionResult
+  [index: number]: SpeechRecognitionResult;
 }
 
 interface SpeechRecognitionResult {
   length: number
   item(index: number): SpeechRecognitionAlternative
-  [index: number]: SpeechRecognitionAlternative
-  [index: number]: SpeechRecognitionAlternative
+  [index: number]: SpeechRecognitionAlternative;
   isFinal: boolean
 }
 
@@ -58,8 +56,8 @@ interface SpeechRecognitionAlternative {
 
 declare global {
   interface Window {
-    SpeechRecognition: new () => SpeechRecognition
-    webkitSpeechRecognition: new () => SpeechRecognition
+    // webkitSpeechRecognition の重複定義を削除しました
+    // この定義が types/speech-recognition.d.ts に移動されていることを前提とします
   }
 }
 
@@ -253,6 +251,8 @@ export function TaskBreakdown({
       return null
     }
 
+    // `webkitSpeechRecognition` は types/speech-recognition.d.ts に定義されていることを前提とする
+    // もし SpeechRecognition もそちらで定義されている場合は、window.SpeechRecognition の型も確認する
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
       console.log("SpeechRecognition not available")
@@ -385,6 +385,7 @@ export function TaskBreakdown({
   useEffect(() => {
     if (typeof window === "undefined") return
 
+    // `webkitSpeechRecognition` は types/speech-recognition.d.ts に定義されていることを前提とする
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     setIsSupported(!!SpeechRecognition)
     console.log("Speech recognition supported:", !!SpeechRecognition)
@@ -428,7 +429,7 @@ export function TaskBreakdown({
       cleanupRecognition()
 
       // 少し待ってから新しいインスタンスを作成
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      // await new Promise((resolve) => setTimeout(resolve, 100)); // この行は不要なためコメントアウト
 
       console.log("🔧 Creating new recognition instance...")
       const recognition = createSpeechRecognition()
@@ -634,6 +635,7 @@ export function TaskBreakdown({
             tutorialStep && !isTutorialBreakdownEnabled("breakdown-submit") ? "cursor-not-allowed" : ""
           }`}
           onClick={handleBreakdown}
+          // disabledプロパティの型エラーを修正
           disabled={
             !text.trim() ||
             isProcessing ||
@@ -744,7 +746,10 @@ export function TaskBreakdown({
                   className={`tutorial-text-input min-h-[200px] resize-none text-sm ${
                     tutorialStep && !isTutorialBreakdownEnabled("text-input") ? "opacity-50 cursor-not-allowed" : ""
                   }`}
-                  disabled={tutorialStep && !isTutorialBreakdownEnabled("text-input")}
+                  // disabledプロパティの型エラーを修正
+                  disabled={
+                    !!(tutorialStep && !isTutorialBreakdownEnabled("text-input"))
+                  }
                 />
                 {interimText && (
                   <div className="absolute bottom-2 right-2 bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
@@ -794,7 +799,12 @@ export function TaskBreakdown({
                   : "bg-gray-400 cursor-not-allowed shadow-md"
           } ${tutorialStep && !isTutorialBreakdownEnabled("voice-input") ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={toggleRecording}
-          disabled={!isSupported || isProcessing || (tutorialStep && !isTutorialBreakdownEnabled("voice-input"))}
+          // disabledプロパティの型エラーを修正
+          disabled={
+            !isSupported ||
+            isProcessing ||
+            !!(tutorialStep && !isTutorialBreakdownEnabled("voice-input"))
+          }
         >
           {isInitializing ? (
             <Loader2 className="h-7 w-7 text-white animate-spin" />
@@ -815,7 +825,6 @@ export function TaskBreakdown({
         </div>
       )}
 
-      {/* Initializing Status */}
       {isInitializing && !isRecording && (
         <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-10">
           <div className="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs">🔄 音声認識を準備中...</div>

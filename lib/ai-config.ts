@@ -1,6 +1,6 @@
 // APIキーの設定 - OpenAIに変更
 export const AI_CONFIG = {
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+  open_api_key: process.env.open_api_key|| "",
 
   // 他のAIプロバイダーのAPIキーもここに追加可能
   // GOOGLE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY || "",
